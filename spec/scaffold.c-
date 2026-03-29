@@ -1,0 +1,118 @@
+// C• Language Specification — Universal Scaffold
+// File: spec/scaffold.c-
+//
+// The Pith<E> type is the foundational data structure of C•.
+// Every heap allocation lives inside a Pith site.
+
+use spec::elements::{carbon, hydrogen, oxygen, nitrogen, silica, calcium, magnesium};
+
+// ─── Site ─────────────────────────────────────────────────────────────────────
+// A single binding location on the scaffold surface.
+// Analogous to one atomic surface site on a cellulose microfibril.
+struct Site<E> {
+    element:   E,          // the CHON element type stored at this site
+    occupied:  bool,       // true if a signal is currently bound here
+    decayed:   bool,       // true if the site has been released back to the scaffold
+    crystal:   Option<silica>, // optional piezoelectric modifier
+}
+
+// ─── MineralAnchor ────────────────────────────────────────────────────────────
+// Rigid, magnetically active mineral that holds the scaffold together.
+// Either calcium or magnesium can serve as the anchor; both are equally valid.
+enum MineralAnchor {
+    Calcium(calcium),
+    Magnesium(magnesium),
+}
+
+// ─── Pith<E> ──────────────────────────────────────────────────────────────────
+// The Universal Scaffold.  Parameterised over a CHON element type E.
+//
+//   branch_factor — default 8, mirrors 8-connected cellulose lattice
+//   depth         — number of layers; surface area = branch_factor ^ depth
+struct Pith<E> {
+    element:        E,
+    branch_factor:  u8 = 8,
+    depth:          u32 = 4,
+    sites:          Vec<Site<E>>,
+    crystal:        Option<silica>,
+    mineral_anchor: Option<MineralAnchor>,
+}
+
+impl<E> Pith<E> {
+    // Construct a new scaffold with default branch factor and depth.
+    fn new() -> Pith<E>;
+
+    // Construct a scaffold whose ion channels are tuned to the given crystal.
+    fn with_crystal(xtal: silica) -> Pith<E>;
+
+    // Returns the total number of binding sites (open + occupied).
+    fn surface_area() -> u64;
+
+    // Iterate over all currently open (unoccupied) sites.
+    fn binding_sites() -> Iterator<Site<E>>;
+
+    // Bind a signal to the next available site.  Returns the site for tracking.
+    fn bind(signal: Signal) -> Site<E>;
+
+    // Release a site; it becomes available for re-binding.
+    fn release(site: Site<E>);
+
+    // Pair this scaffold with an Amplifier module.
+    // The pairing is rejected at compile time if gain ≤ 1.0.
+    fn pair<A: Amplifier>(amplifier: A) -> PairedPith<E, A>;
+
+    // Coat all crystal sites with a semiconductor layer for betavoltaic operation.
+    fn coat_crystals(semiconductor: SemiconductorType, thickness: Length)
+        -> BetavoltaicPith<E>;
+
+    // Emit a frequency-tagged signal on the matching ion channel.
+    fn emit(frequency: Frequency, signal: Signal);
+}
+
+// ─── PairedPith<E, A> ─────────────────────────────────────────────────────────
+// A scaffold that has been paired with an Amplifier module.
+struct PairedPith<E, A: Amplifier> {
+    inner:     Pith<E>,
+    amplifier: A,
+}
+
+impl<E, A: Amplifier> PairedPith<E, A> {
+    // Net gain across all stacked amplifier layers.
+    fn net_gain() -> f64;
+
+    // Chain a second pairing on top of this one.
+    fn pair<B: Amplifier>(amplifier: B) -> PairedPith<E, B>;
+
+    // Delegate all Pith methods to the inner scaffold.
+    delegate Pith<E>;
+}
+
+// ─── BetavoltaicPith<E> ───────────────────────────────────────────────────────
+// A scaffold whose crystals have been coated with a semiconductor layer,
+// enabling them to harvest beta particles from ⁴⁰K decay.
+struct BetavoltaicPith<E> {
+    inner:        PairedPith<E, PotassiumSalt>,
+    semiconductor: SemiconductorType,
+    thickness_nm:  f64,
+}
+
+impl<E> BetavoltaicPith<E> {
+    // Current power output in nanowatts.
+    fn power_output_nw() -> f64;
+
+    // Estimated operational lifetime (effectively inexhaustible at human scales).
+    fn estimated_life() -> Duration;
+
+    // Describe the underlying power source.
+    fn power_source() -> BetavoltaicCell;
+
+    // Delegate all PairedPith methods.
+    delegate PairedPith<E, PotassiumSalt>;
+}
+
+// ─── Amplifier trait ──────────────────────────────────────────────────────────
+trait Amplifier {
+    fn resonance()        -> Frequency;
+    fn amplify(Signal)    -> Signal;
+    fn gain_at(Frequency) -> f64;
+}

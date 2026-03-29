@@ -1,0 +1,75 @@
+// C• Example — Frequency-Programming a Plant Signal
+// File: examples/program-banana.c-
+//
+// Demonstrates how to use ion-channel signaling to "instruct" a plant scaffold
+// to prioritise citric acid production over amylase production, effectively
+// shifting the "flavour" of the output from banana to citrus.
+//
+// Biological basis: Ion-Channel Signaling (phloem internet hacking).
+// Reference:        docs/ion-channel-signaling.md
+
+use scaffold::Pith;
+use signals::{IonChannel, FrequencyTable, Signal};
+use pairings::PotassiumSalt;
+
+fn main() {
+    // ── Step 1: Build a nitrogen-element scaffold paired for nutrient signaling ──
+    //
+    // Nitrogen is chosen because it is the structural backbone element —
+    // it forms the load-bearing spine that keeps the signal channels open long enough
+    // for the "programme" to propagate through the whole phloem network.
+    let scaffold = Pith::<nitrogen>::new()
+        .pair(PotassiumSalt);
+
+    println!("Scaffold surface area: {} binding sites", scaffold.surface_area());
+    // >> Scaffold surface area: 4096 binding sites  (8^4, default depth = 4)
+
+    // ── Step 2: Look up the resonance frequencies for the target molecules ──
+    //
+    // The FrequencyTable maps molecule names to the EM frequency at which their
+    // atomic bonds resonate most strongly.  Exposing the pith to that frequency
+    // "highlights" that molecule in the ion-channel routing layer.
+    let banana_freq: Frequency = FrequencyTable::lookup("amylase");
+    let citrus_freq: Frequency = FrequencyTable::lookup("citric_acid");
+
+    println!("Amylase resonance:     {}", banana_freq);   // ~9.8 GHz
+    println!("Citric acid resonance: {}", citrus_freq);   // ~10.2 GHz
+
+    // ── Step 3: Open an inhibit channel for amylase ──
+    //
+    // Any ion channel bound to the scaffold that carries Signal::inhibit() will
+    // cause cells with matching receptors to downregulate the target molecule.
+    let suppress: IonChannel<nitrogen> = IonChannel::open(
+        frequency: banana_freq,
+        molecule:  "amylase",
+    );
+    suppress.send(Signal::inhibit());
+
+    // ── Step 4: Open an amplify channel for citric acid ──
+    //
+    // gain: 2.0 means cells will attempt to double their citric-acid output.
+    let boost: IonChannel<nitrogen> = IonChannel::open(
+        frequency: citrus_freq,
+        molecule:  "citric_acid",
+    );
+    boost.send(Signal::amplify(gain: 2.0));
+
+    // ── Step 5: Bind both channels to the scaffold for persistent delivery ──
+    //
+    // Bound channels continue firing at the scaffold's crystal tick rate
+    // (32.768 kHz by default) until explicitly released.
+    scaffold.bind(suppress);
+    scaffold.bind(boost);
+
+    println!("Programme committed.  Open channels: {}", scaffold.binding_sites().count());
+    // >> Programme committed.  Open channels: 2
+
+    // ── Step 6: Confirm the phloem routing ──
+    //
+    // In a real deployment this would interface with the plant's physical phloem.
+    // Here we just inspect the runtime's simulated phloem DAG.
+    let phloem = runtime::phloem();
+    println!("Phloem sources: {:?}", phloem.sources());
+    println!("Phloem sinks:   {:?}", phloem.sinks());
+    println!("Signal path:    {:?}", phloem.path_from(suppress.node(), boost.node()));
+}
