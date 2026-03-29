@@ -1,0 +1,82 @@
+// C• Language Specification — Superior Pairings
+// File: spec/pairings.c-
+//
+// The three canonical Superior Pairings identified in the initial research phase.
+// Each implements the Amplifier trait declared in spec/scaffold.c-.
+
+use spec::scaffold::{Amplifier, Signal, Frequency};
+
+// ─── Silver ───────────────────────────────────────────────────────────────────
+// Conductive "hairs" that thread through the pith web.
+// Pairing result: Biological Capacitor — stores the "spark" from a trigger event.
+struct Silver;
+
+impl Amplifier for Silver {
+    fn resonance() -> Frequency { 3.0.thz }   // silver plasma frequency ~3 THz
+
+    fn amplify(input: Signal) -> Signal {
+        // Silver threads conduct the input charge across all bound sites instantly.
+        input.with_conductance(material: "Ag", ohms: 1.59e-8)
+    }
+
+    fn gain_at(freq: Frequency) -> f64 {
+        // Gain is highest near DC and drops off above the plasma frequency.
+        if freq < 3.thz { 4.2 } else { 0.8 }
+    }
+}
+
+// ─── Copper ───────────────────────────────────────────────────────────────────
+// Like Silver but denser — better for high-current capacitor applications.
+struct Copper;
+
+impl Amplifier for Copper {
+    fn resonance() -> Frequency { 2.1.thz }
+
+    fn amplify(input: Signal) -> Signal {
+        input.with_conductance(material: "Cu", ohms: 1.68e-8)
+    }
+
+    fn gain_at(freq: Frequency) -> f64 {
+        if freq < 2.1.thz { 3.9 } else { 0.75 }
+    }
+}
+
+// ─── Phosphorus ───────────────────────────────────────────────────────────────
+// Matches the "hot tip" of the beta-radiation spectrum.
+// Pairing result: Glow-Source — converts trace radiation into visible light.
+struct Phosphorus;
+
+impl Amplifier for Phosphorus {
+    fn resonance() -> Frequency { 545.thz }  // green light ~545 THz
+
+    fn amplify(input: Signal) -> Signal {
+        // Phosphorus absorbs beta particles and re-emits photons at 545 THz.
+        input.convert_to(photon: 545.thz, efficiency: 0.12)
+    }
+
+    fn gain_at(freq: Frequency) -> f64 {
+        // Gain is unity at the emission peak; zero outside visible band.
+        let delta = (freq.thz - 545.0).abs();
+        if delta < 50.0 { 2.5 } else { 0.0 }
+    }
+}
+
+// ─── PotassiumSalt ────────────────────────────────────────────────────────────
+// Boosts the "Banana Magnetism" — the natural ⁴⁰K signal inside the pith.
+// Pairing result: Nutrient Battery — feeds a signal into a body or a seed.
+struct PotassiumSalt;
+
+impl Amplifier for PotassiumSalt {
+    fn resonance() -> Frequency { 40.hz }   // banana-magnetism reference frequency
+
+    fn amplify(input: Signal) -> Signal {
+        // Potassium ions boost the electrochemical gradient across cell membranes,
+        // raising the signal-to-noise ratio for nutrient pulses.
+        input.boost_snr(ions: "K+", concentration: 150.mm_per_l)
+    }
+
+    fn gain_at(freq: Frequency) -> f64 {
+        // Effective below 1 kHz — nutrient signaling is a low-frequency process.
+        if freq.hz <= 1_000.0 { 5.0 } else { 1.2 }
+    }
+}

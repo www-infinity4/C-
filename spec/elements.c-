@@ -1,0 +1,60 @@
+// C• Language Specification — Base Element Types
+// File: spec/elements.c-
+//
+// The four CHON scalars are the only primitive types in C•.
+// All composite types are built from combinations of these four.
+
+// ─── Carbon ───────────────────────────────────────────────────────────────────
+// Dense, stable, long-lived storage medium.
+// Use for values that must persist across many runtime ticks without modification.
+type carbon = scalar {
+    density:   high,
+    stability: high,
+    mobility:  low,
+    charge:    neutral,
+};
+
+// ─── Hydrogen ─────────────────────────────────────────────────────────────────
+// Mobile, reactive, fast-moving carrier.
+// Use for transient values that travel between scaffold sites at high speed.
+type hydrogen = scalar {
+    density:   low,
+    stability: low,
+    mobility:  high,
+    charge:    positive,
+};
+
+// ─── Oxygen ───────────────────────────────────────────────────────────────────
+// Oxidising trigger: causes a state transition in any bound scaffold site.
+// Use for events, interrupts, and one-shot activation signals.
+type oxygen = scalar {
+    density:    medium,
+    reactivity: high,
+    trigger:    true,
+    charge:     negative,
+};
+
+// ─── Nitrogen ─────────────────────────────────────────────────────────────────
+// Slow, structural, load-bearing backbone.
+// Use for values that form the rigid spine of a scaffold (e.g. nutrient signals).
+type nitrogen = scalar {
+    density:   medium,
+    stability: high,
+    structure: true,
+    charge:    neutral,
+};
+
+// ─── Silica (trace) ───────────────────────────────────────────────────────────
+// Not a scalar but a crystal modifier.  Attaching silica to a scaffold site
+// gives it a resonance frequency and enables piezoelectric charge storage.
+type silica = crystal {
+    resonance:     variable,   // set by Crystal::new(resonance: <freq>)
+    piezoelectric: true,
+    em_storage:    true,
+};
+
+// ─── Calcium / Magnesium (mineral anchors) ───────────────────────────────────
+// Rigid, magnetically active anchors that hold the scaffold together.
+// They provide the "bones" inside the fluffy cellulose/lignin flesh.
+type calcium   = mineral { rigidity: high,  magnetic: true };
+type magnesium = mineral { rigidity: medium, magnetic: true };

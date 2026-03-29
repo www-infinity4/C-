@@ -1,0 +1,87 @@
+// C• Example — Betavoltaic Trickle Power Source
+// File: examples/bio-battery.c-
+//
+// Demonstrates how to construct a self-sustaining betavoltaic power cell
+// from a potassium-enriched pith scaffold coated with a silicon semiconductor layer.
+//
+// The resulting cell produces a constant nW-scale electrical output for a
+// practical lifetime measured in hundreds of trillions of years — suitable for
+// implants, programmed seeds, and long-lived environmental sensors.
+//
+// Reference: docs/betavoltaic-power.md
+
+use scaffold::{Pith, Crystal};
+use pairings::PotassiumSalt;
+use semiconductor::Silicon;
+use signals::Signal;
+
+fn main() {
+    // ── Step 1: Create a silica crystal tuned to the quartz-watch frequency ──
+    //
+    // 32.768 kHz is the standard quartz oscillator frequency.  It gives the
+    // scaffold a stable, low-power clock and sets the tick rate for trickle mode.
+    let xtal = Crystal::new(
+        resonance: 32_768.hz,
+        material:  silica,
+    );
+
+    println!("Crystal resonance: {} Hz", xtal.resonance().hz);
+    // >> Crystal resonance: 32768 Hz
+
+    // ── Step 2: Build a nitrogen scaffold with the crystal, paired for ⁴⁰K boost ──
+    //
+    // Nitrogen is used because it is the structural backbone; the potassium-salt
+    // pairing concentrates ⁴⁰K ions within the scaffold to maximise beta flux.
+    let pith = Pith::<nitrogen>::with_crystal(xtal)
+        .pair(PotassiumSalt);
+
+    println!("Scaffold net gain: {:.2}x", pith.net_gain());
+    // >> Scaffold net gain: 5.00x  (PotassiumSalt gain_at(32.768 kHz) = 5.0)
+
+    // ── Step 3: Coat crystal junctions with a 1 nm silicon layer ──
+    //
+    // Each silica micro-crystal is coated with an n-type silicon film.
+    // The interface between the SiO₂ crystal and the Si film forms a P-N junction.
+    // Beta particles from ⁴⁰K decay cross this junction and create electron-hole
+    // pairs, producing a continuous DC trickle current.
+    let beta_cell = pith.coat_crystals(
+        semiconductor: Silicon,
+        thickness:     1.nm,
+    );
+
+    // ── Step 4: Inspect the power output ──
+    let source = beta_cell.power_source();
+    println!("Activity:      {} Bq (per kg of K)", source.activity_bq);
+    // >> Activity:      117 Bq (per kg of K)
+
+    println!("Output power:  {:.1} nW", source.output_nw);
+    // >> Output power:  42.0 nW
+
+    println!("Estimated life: {} years", beta_cell.estimated_life().years());
+    // >> Estimated life: 400000000000000 years
+
+    // ── Step 5: Enter trickle mode ──
+    //
+    // In trickle mode the runtime suspends all idle processes and wakes only on
+    // ion-channel events.  Total draw drops to ~10 nW, well within the cell budget.
+    runtime::enter_trickle_mode(clock: xtal.resonance());
+
+    println!("Runtime in trickle mode at {} Hz", runtime::tick_rate().hz);
+    // >> Runtime in trickle mode at 32768 Hz
+
+    // ── Step 6: Emit a periodic nutrient pulse ──
+    //
+    // Every 1000 ticks (~30 ms at 32.768 kHz) the cell emits a low-power
+    // nutrient signal on the 40 Hz banana-magnetism channel.
+    let pulse_interval = 1_000.ticks;
+
+    loop {
+        runtime::sleep(pulse_interval);
+        beta_cell.emit(
+            frequency: 40.hz,
+            signal:    Signal::nutrient_pulse(strength: 0.1.nw),
+        );
+        println!("Nutrient pulse emitted.  Power remaining: {:.1} nW", beta_cell.power_output_nw());
+        // >> Nutrient pulse emitted.  Power remaining: 42.0 nW  (inexhaustible)
+    }
+}
