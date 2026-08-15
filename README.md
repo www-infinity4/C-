@@ -89,3 +89,4 @@ battery.emit(frequency: 40.hz, signal: "nutrient_pulse");
 ---
 
 *C• is open. The scaffold is yours to fill.*
+<script src="https://www-infinity4.github.io/Mint-For-Infinity/infinity-wallet-menu.js" defer></script>
